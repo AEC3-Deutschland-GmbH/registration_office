@@ -9,8 +9,8 @@ module RegistrationOffice
 
         # This is evaluated withing the dynamically created, nested module "RegistryStore"
         mod.module_eval do
-          const_set('UnregisteredKey', Class.new(StandardError))
-          const_set('DuplicateKey', Class.new(StandardError))
+          const_set('UnregisteredKeyError', Class.new(StandardError))
+          const_set('DuplicateKeyError', Class.new(StandardError))
 
           class << self
             def registry
@@ -24,13 +24,13 @@ module RegistrationOffice
             end
 
             def use!(key)
-              raise const_get('UnregisteredKey'), "key `#{key}` is not registered" unless key?(key)
+              raise const_get('UnregisteredKeyError'), "key `#{key}` is not registered" unless key?(key)
 
               [key, key?(key)]
             end
 
             def key!(key)
-              raise const_get('UnregisteredKey'), "key `#{key}` is not registered" unless key?(key)
+              raise const_get('UnregisteredKeyError'), "key `#{key}` is not registered" unless key?(key)
 
               key
             end
@@ -42,7 +42,7 @@ module RegistrationOffice
             private
 
             def register(key, *args)
-              raise const_get('DuplicateKey'), "key `#{key}` already registered" if registry.key?(key)
+              raise const_get('DuplicateKeyError'), "key `#{key}` already registered" if registry.key?(key)
 
               registry[key] = *args
             end

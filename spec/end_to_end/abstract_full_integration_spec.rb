@@ -69,11 +69,11 @@ RSpec.describe 'abstract full integration' do
 
     describe 'demanding an invalid key' do
       context 'on instance' do
-        it { expect { Dealership::Order.new.demand_key(:xxx) }.to raise_error Dealer::RegistryStore::UnregisteredKey, 'key `xxx` is not registered' }
+        it { expect { Dealership::Order.new.demand_key(:xxx) }.to raise_error Dealer::RegistryStore::UnregisteredKeyError, 'key `xxx` is not registered' }
       end
 
       context 'on class' do
-        it { expect { Dealership::Order.self_demand_key(:xxx) }.to raise_error Dealer::RegistryStore::UnregisteredKey, 'key `xxx` is not registered' }
+        it { expect { Dealership::Order.self_demand_key(:xxx) }.to raise_error Dealer::RegistryStore::UnregisteredKeyError, 'key `xxx` is not registered' }
       end
     end
   end

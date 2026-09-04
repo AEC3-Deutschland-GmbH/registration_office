@@ -71,7 +71,7 @@ RSpec.describe RegistrationOffice::Registry do
                   register :key_one
                   register :key_one
                 end
-              end.to raise_error RegisteringClass::RegistryStore::DuplicateKey, 'key `key_one` already registered'
+              end.to raise_error RegisteringClass::RegistryStore::DuplicateKeyError, 'key `key_one` already registered'
             end
           end
 
@@ -95,8 +95,8 @@ RSpec.describe RegistrationOffice::Registry do
                 expect(subject.registry.key!(:key_one)).to eql(:key_one)
               end
 
-              it 'raises RegistryStore::UnregisteredKey when registered' do
-                expect { subject.registry.key!(:xxx) }.to raise_error subject::RegistryStore::UnregisteredKey, 'key `xxx` is not registered'
+              it 'raises RegistryStore::UnregisteredKeyError when registered' do
+                expect { subject.registry.key!(:xxx) }.to raise_error subject::RegistryStore::UnregisteredKeyError, 'key `xxx` is not registered'
               end
             end
 
@@ -107,8 +107,8 @@ RSpec.describe RegistrationOffice::Registry do
                 expect(subject.registry.key!(:key_one)).to eql(:key_one)
               end
 
-              it 'raises RegistryStore::UnregisteredKey when registered' do
-                expect { subject.registry.key!(:xxx) }.to raise_error RegisteringClass::RegistryStore::UnregisteredKey, 'key `xxx` is not registered'
+              it 'raises RegistryStore::UnregisteredKeyError when registered' do
+                expect { subject.registry.key!(:xxx) }.to raise_error RegisteringClass::RegistryStore::UnregisteredKeyError, 'key `xxx` is not registered'
               end
             end
           end

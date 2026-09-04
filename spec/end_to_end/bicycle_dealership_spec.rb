@@ -58,8 +58,8 @@ RSpec.describe 'bicycle dealership' do
 
   describe 'the Dealer' do
     context 'when ordering a :car' do
-      it 'tries to insult the customer but this raises UnregisteredKey' do
-        expect { Dealer.new.call(:car) }.to raise_error Dealer::RegistryStore::UnregisteredKey, 'key `insult` is not registered'
+      it 'tries to insult the customer but this raises UnregisteredKeyError' do
+        expect { Dealer.new.call(:car) }.to raise_error Dealer::RegistryStore::UnregisteredKeyError, 'key `insult` is not registered'
       end
     end
 
