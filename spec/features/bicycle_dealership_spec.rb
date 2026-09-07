@@ -10,7 +10,7 @@ RSpec.describe 'bicycle dealership' do
           :invalid_bicycle_configuration,
           :invalid_coupon_code,
           :bicycle_not_in_stock,
-          :customer_not_solvent,
+          :customer_not_solvent
         )
 
         def call(customers_order)
@@ -58,7 +58,10 @@ RSpec.describe 'bicycle dealership' do
     context 'when ordering a :car' do
       it 'tries to insult the customer but this raises UnregisteredKeyError' do
         expect { Dealer.new.call(:car) }
-          .to raise_error Dealer::RegistryStore::UnregisteredKeyError, 'key `insult` is not registered'
+          .to raise_error(
+                RegistrationOffice::Register::UnregisteredKeyError,
+                'Register `placeholder` in `Dealer`: key `insult` is not registered'
+              )
       end
     end
 

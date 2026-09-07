@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'register'
+
 module RegistrationOffice
   # Provides the methods +register+ and +registry+ when included.
   module Registry
@@ -15,31 +17,33 @@ module RegistrationOffice
           const_set('UnregisteredKeyError', Class.new(StandardError))
           const_set('DuplicateKeyError', Class.new(StandardError))
 
-          class << self
-            def registry
-              @registry ||= {}
-            end
+          define_singleton_method(:registry) do
+            @registry ||= Register.new(base, :placeholder)
+          end
 
-            alias_method :all, :registry
+          class << self
+            # def registry
+            #   @registry ||= Register.new(base, :placeholder)
+            # end
+
+            def all
+              registry.registry
+            end
 
             def keys
               registry.keys
             end
 
             def use!(key)
-              raise const_get('UnregisteredKeyError'), "key `#{key}` is not registered" unless key?(key)
-
-              [key, key?(key)]
+              registry.use!(key)
             end
 
             def key!(key)
-              raise const_get('UnregisteredKeyError'), "key `#{key}` is not registered" unless key?(key)
-
-              key
+              registry.key!(key)
             end
 
             def key?(key)
-              registry[key]
+              registry.key?(key)
             end
 
             private
@@ -47,11 +51,7 @@ module RegistrationOffice
             def register(*keys)
               raise const_get('MultipleRegistriesError'), 'registering is only allowed once' if @registry
 
-              keys.each do |key|
-                raise const_get('DuplicateKeyError'), "key `#{key}` already registered" if registry.key?(key)
-
-                registry[key] = []
-              end
+              registry.register_keys(*keys)
             end
           end
         end

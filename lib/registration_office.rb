@@ -42,10 +42,10 @@ require_relative 'registration_office/demand'
 #     end
 #   end
 #
-# Unregistered keys raise an error that is nested in the registering class:
+# Unregistered keys raise an error:
 #   BicycleDealer.new.call(:car)
 #   # raises UnregisteredKeyError:
-#   # => Dealer::RegistryStore::UnregisteredKeyError: 'key `insult` is not registered'
+#   # => RegistrationOffice::Register::UnregisteredKeyError: 'key `insult` is not registered'
 #
 #   BicycleDealer.new.call(:golden_bike)
 #   # => :customer_not_solvent

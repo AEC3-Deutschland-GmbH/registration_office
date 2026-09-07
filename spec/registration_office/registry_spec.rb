@@ -75,7 +75,10 @@ RSpec.describe RegistrationOffice::Registry do
 
             it do
               expect { register_duplicate_key }
-                .to raise_error RegisteringClass::RegistryStore::DuplicateKeyError, 'key `key_one` already registered'
+                .to raise_error(
+                      RegistrationOffice::Register::DuplicateKeyError,
+                      'Register `placeholder` in `RegisteringClass`: key `key_one` already registered'
+                    )
             end
           end
 
@@ -101,9 +104,12 @@ RSpec.describe RegistrationOffice::Registry do
                 expect(registering_class.registry.key!(:key_one)).to be :key_one
               end
 
-              it 'raises RegistryStore::UnregisteredKeyError when registered' do
+              it 'raises RegistrationOffice::Register::UnregisteredKeyError when not registered' do
                 expect { registering_class.registry.key!(:xxx) }
-                  .to raise_error registering_class::RegistryStore::UnregisteredKeyError, 'key `xxx` is not registered'
+                  .to raise_error(
+                        RegistrationOffice::Register::UnregisteredKeyError,
+                        'Register `placeholder` in `RegisteringClass`: key `xxx` is not registered'
+                      )
               end
             end
 
@@ -114,9 +120,12 @@ RSpec.describe RegistrationOffice::Registry do
                 expect(registering_instance.registry.key!(:key_one)).to be :key_one
               end
 
-              it 'raises RegistryStore::UnregisteredKeyError when registered' do
+              it 'raises RegistrationOffice::Register::UnregisteredKeyError when not registered' do
                 expect { registering_instance.registry.key!(:xxx) }
-                  .to raise_error RegisteringClass::RegistryStore::UnregisteredKeyError, 'key `xxx` is not registered'
+                  .to raise_error(
+                        RegistrationOffice::Register::UnregisteredKeyError,
+                        'Register `placeholder` in `RegisteringClass`: key `xxx` is not registered'
+                      )
               end
             end
           end
