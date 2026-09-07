@@ -69,8 +69,7 @@ RSpec.describe RegistrationOffice::Registry do
 
             let(:register_duplicate_key) do
               RegisteringClass.class_eval do
-                register :key_one
-                register :key_one
+                register(:key_one, :key_one)
               end
             end
 
@@ -86,8 +85,10 @@ RSpec.describe RegistrationOffice::Registry do
                 Class.new do
                   include RegistrationOffice::Registry
 
-                  register :key_one
-                  register :key_two
+                  register(
+                    :key_one,
+                    :key_two
+                  )
                 end
 
               stub_const('RegisteringClass', test_class)
@@ -128,8 +129,10 @@ RSpec.describe RegistrationOffice::Registry do
             Class.new do
               include RegistrationOffice::Registry
 
-              register :key_one
-              register :key_two
+              register(
+                :key_one,
+                :key_two
+              )
             end
 
           stub_const('RegisteringClass', test_class)
@@ -152,8 +155,10 @@ RSpec.describe RegistrationOffice::Registry do
             Class.new do
               include RegistrationOffice::Registry
 
-              register :key_one
-              register :key_two
+              register(
+                :key_one,
+                :key_two
+              )
             end
 
           stub_const('RegisteringClass', test_class)
