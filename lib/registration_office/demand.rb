@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'demands'
+
 module RegistrationOffice
   # Defines the "receiving end" of a register, i.e. the demanding (consuming) object.
   # This module is not intended to be included directly.
@@ -32,7 +34,7 @@ module RegistrationOffice
         raise ArgumentError, "`#{registry_object}` is not a known Class or Module"
       end
 
-      # rubocop:disable-next Metrics/AbcSize, Metrics/MethodLength
+      # rubocop:disable-next Metrics/MethodLength
       def prepare_mod(mod, registry_object)
         unless registry_object.respond_to?(:registry)
           raise ArgumentError, "`#{registry_object.inspect}` does not respond to #registry"
@@ -40,21 +42,19 @@ module RegistrationOffice
 
         # This is evaluated withing the dynamically created, nested module "RegistryDemand"
         mod.module_eval do
+          include Demands
+
+          add_demand(:placeholder, registry_object)
           # Eq. to `def self.included(base)`
           define_singleton_method :included do |base|
             # This is evaluated withing the including class/module
             base.module_eval do
               const_set('RegistryDemand', mod)
 
-              define_singleton_method(:demand) { const_get('RegistryDemand') }
-              define_method(:demand) { self.class.const_get('RegistryDemand') }
+              define_singleton_method(:demand) { const_get('RegistryDemand').demand(:placeholder) }
+              define_method(:demand) { self.class.const_get('RegistryDemand').demand(:placeholder) }
             end
           end
-
-          # "Delegated" methods
-          define_singleton_method(:key!) { |key| registry_object.registry.key!(key) }
-          define_singleton_method(:use!) { |key| registry_object.registry.use!(key) }
-          define_singleton_method(:keys) { registry_object.registry.keys }
         end
       end
     end
