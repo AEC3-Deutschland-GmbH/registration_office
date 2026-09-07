@@ -21,7 +21,7 @@ module RegistrationOffice
               @registers ||= Registers.new
             end
 
-            def registry(name = :placeholder)
+            def registry(name)
               registers.fetch(name)
             end
 
@@ -29,9 +29,9 @@ module RegistrationOffice
               registry.registry
             end
 
-            def keys
-              registry.keys
-            end
+            # def keys
+            #   registry.keys
+            # end
 
             def use!(key)
               registry.use!(key)
@@ -47,17 +47,18 @@ module RegistrationOffice
 
             private
 
-            def register(*keys, name: :placeholder)
-              register = Register.new(registering_object).tap { it.register_keys(name, keys:) }
-              registers.register_a_register(name, register)
+            def register(register_name, keys:)
+              register = Register.new(registering_object).tap { it.register_keys(register_name, keys:) }
+              registers.register_a_register(register_name, register)
+              registering_object.add_demand(register_name, registering_object)
             end
           end
         end
 
         # This is evaluated on "self" for the including class/module
         class << self
-          def registry
-            const_get('RegistryStore')
+          def registry(name)
+            const_get('RegistryStore').registry(name)
           end
 
           private
@@ -68,11 +69,11 @@ module RegistrationOffice
         end
 
         # "Delegate" #registry to class
-        def registry
-          self.class.registry
+        def registry(name)
+          self.class.registry(name)
         end
 
-        include RegistrationOffice[:demand, registry_object: base]
+        include RegistrationOffice[:demand]
       end
     end
   end

@@ -7,16 +7,20 @@ RSpec.describe 'bicycle dealership' do
         include RegistrationOffice[:registration]
 
         register(
-          :invalid_bicycle_configuration,
-          :invalid_coupon_code,
-          :bicycle_not_in_stock,
-          :customer_not_solvent
+          :failures,
+          keys:
+            [
+              :invalid_bicycle_configuration,
+              :invalid_coupon_code,
+              :bicycle_not_in_stock,
+              :customer_not_solvent
+            ]
         )
 
         def call(customers_order)
-          return demand.key!(:insult) if customers_order == :car
+          return demand(:failures).key!(:insult) if customers_order == :car
 
-          return demand.key!(:invalid_bicycle_configuration) if customers_order == :bicycle_with_zero_wheels
+          return demand(:failures).key!(:invalid_bicycle_configuration) if customers_order == :bicycle_with_zero_wheels
 
           Dealership::Order.new.invoice(customers_order)
         end
@@ -26,14 +30,16 @@ RSpec.describe 'bicycle dealership' do
 
     order_class =
       Class.new do
-        include RegistrationOffice[:demand, registry_object: Dealer]
+        include RegistrationOffice[:demand]
+
+        add_demand(:failures, Dealer)
 
         def invoice(customers_order)
           case customers_order
           when :golden_bike
-            demand.key!(:customer_not_solvent)
+            demand(:failures).key!(:customer_not_solvent)
           when :cool_bike
-            demand.key!(:bicycle_not_in_stock)
+            demand(:failures).key!(:bicycle_not_in_stock)
           else
             'thx for your order'
           end
@@ -44,10 +50,12 @@ RSpec.describe 'bicycle dealership' do
 
     supervisor_class =
       Module.new do
-        include RegistrationOffice[:demand, registry_object: Dealer]
+        include RegistrationOffice[:demand]
+
+        add_demand(:failures, Dealer)
 
         def self.supervise
-          demand.keys
+          demand(:failures).keys
         end
       end
 
@@ -60,7 +68,7 @@ RSpec.describe 'bicycle dealership' do
         expect { Dealer.new.call(:car) }
           .to raise_error(
                 RegistrationOffice::Register::UnregisteredKeyError,
-                'Register `placeholder` in `Dealer`: key `insult` is not registered'
+                'Register `failures` in `Dealer`: key `insult` is not registered'
               )
       end
     end

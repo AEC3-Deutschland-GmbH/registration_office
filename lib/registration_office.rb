@@ -57,12 +57,12 @@ require_relative 'registration_office/demand'
 #   Order.demand.keys
 #   # => [:invalid_bicycle_configuration, :invalid_coupon_code, ...]
 module RegistrationOffice
-  def self.[](module_name, registry_object: nil)
+  def self.[](module_name)
     case module_name
     when :registration
       Registry
     when :demand
-      Demand[registry_object]
+      Demand
     end
   end
 end

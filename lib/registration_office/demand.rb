@@ -9,50 +9,38 @@ module RegistrationOffice
   # which returns a new module that can be included.
   module Demand
     class << self
-      # @param registry_object [Object] The Ruby object (class, module) that defined the register which should be used.
-      #
-      # @return [Module]
-      def [](registry_object)
-        safe_constantize(registry_object)
+      def included(base)
+        mod = prepare_mod
+        base.module_eval do
+          const_set('RegistryDemand', mod)
 
-        mod = Module.new
-        prepare_mod(mod, registry_object)
-        mod
+          define_singleton_method(:add_demand) do |register_name, register_object|
+            const_get('RegistryDemand').add_demand(
+              register_name,
+              register_object.registry(register_name)
+            )
+          end
+
+          define_singleton_method(:demand) { |register_name| const_get('RegistryDemand').demand(register_name) }
+          define_method(:demand) { |register_name| self.class.const_get('RegistryDemand').demand(register_name) }
+        end
       end
 
       private
 
-      def safe_constantize(registry_object)
-        return registry_object if registry_object.is_a?(Class) || registry_object.is_a?(Module)
+      def prepare_mod
+        Module.new do
+          class << self
+            def demands
+              @demands ||= Registers.new
+            end
 
-        unless registry_object.is_a?(String)
-          raise ArgumentError, "`#{registry_object.inspect}` must be a String or a Class or a Module"
-        end
+            def demand(register_name)
+              demands.fetch(register_name)
+            end
 
-        Object.const_get(registry_object)
-      rescue NameError
-        raise ArgumentError, "`#{registry_object}` is not a known Class or Module"
-      end
-
-      # rubocop:disable-next Metrics/MethodLength
-      def prepare_mod(mod, registry_object)
-        unless registry_object.respond_to?(:registry)
-          raise ArgumentError, "`#{registry_object.inspect}` does not respond to #registry"
-        end
-
-        # This is evaluated withing the dynamically created, nested module "RegistryDemand"
-        mod.module_eval do
-          include Demands
-
-          add_demand(:placeholder, registry_object)
-          # Eq. to `def self.included(base)`
-          define_singleton_method :included do |base|
-            # This is evaluated withing the including class/module
-            base.module_eval do
-              const_set('RegistryDemand', mod)
-
-              define_singleton_method(:demand) { const_get('RegistryDemand').demand(:placeholder) }
-              define_method(:demand) { self.class.const_get('RegistryDemand').demand(:placeholder) }
+            def add_demand(register_name, register)
+              demands.register_a_register(register_name, register)
             end
           end
         end
