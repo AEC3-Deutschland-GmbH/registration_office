@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module RegistrationOffice
+  # Provides the methods +register+ and +registry+ when included.
   module Registry
+    # rubocop:disable-next Metrics/AbcSize, Metrics/MethodLength, Metrics/BlockLength
     def self.included(base)
       # This is evaluated withing the including class/module
       base.module_eval do
