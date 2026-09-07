@@ -27,14 +27,14 @@ RSpec.describe RegistrationOffice::Demand do
   end
 
   describe '.safe_constantize' do
-    subject { RegistrationOffice::Demand.send(:safe_constantize, registry_object) }
+    subject(:call_described_method) { RegistrationOffice::Demand.send(:safe_constantize, registry_object) }
 
     context 'when given registry object is a Module' do
       let(:registry_object) { RegistryObject }
 
       before { stub_registry_module }
 
-      it { expect { subject }.not_to raise_error }
+      it { expect { call_described_method }.not_to raise_error }
       it { is_expected.to be registry_object }
     end
 
@@ -43,7 +43,7 @@ RSpec.describe RegistrationOffice::Demand do
 
       before { stub_registry_class }
 
-      it { expect { subject }.not_to raise_error }
+      it { expect { call_described_method }.not_to raise_error }
       it { is_expected.to be registry_object }
     end
 
@@ -51,7 +51,7 @@ RSpec.describe RegistrationOffice::Demand do
       context 'that does not define any Class or Module' do
         let(:registry_object) { 'xxx' }
 
-        it { expect { subject }.to raise_error ArgumentError, '`xxx` is not a known Class or Module' }
+        it { expect { call_described_method }.to raise_error ArgumentError, '`xxx` is not a known Class or Module' }
       end
 
       context 'that defines a known Class or Module' do
@@ -59,7 +59,7 @@ RSpec.describe RegistrationOffice::Demand do
 
         before { stub_registry_class }
 
-        it { expect { subject }.not_to raise_error }
+        it { expect { call_described_method }.not_to raise_error }
         it { is_expected.to be RegistryObject }
       end
     end

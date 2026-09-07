@@ -2,7 +2,7 @@
 
 RSpec.describe 'abstract full integration' do
   before do
-    test_class =
+    dealer_class =
       Class.new do
         include RegistrationOffice[:registration]
 
@@ -20,11 +20,9 @@ RSpec.describe 'abstract full integration' do
         end
       end
 
-    stub_const('Dealer', test_class)
-  end
+    stub_const('Dealer', dealer_class)
 
-  before do
-    test_class =
+    order_class =
       Class.new do
         include RegistrationOffice[:demand, registry_object: Dealer]
 
@@ -37,42 +35,45 @@ RSpec.describe 'abstract full integration' do
         end
       end
 
-    stub_const('Dealership::Order', test_class)
+    stub_const('Dealership::Order', order_class)
   end
 
   describe 'registering object' do
     describe 'demanding on its own registry' do
-      context 'on instance' do
+      context 'when called on instance' do
         it { expect(Dealer.new.demand_key(:invalid_bicycle_configuration)).to eq :invalid_bicycle_configuration }
       end
 
-      context 'on class' do
+      context 'when called on class' do
         it { expect(Dealer.self_demand_key(:invalid_bicycle_configuration)).to eq :invalid_bicycle_configuration }
       end
     end
 
     describe '.registry.all' do
-      it { expect(Dealer.registry.keys).to eq [:invalid_bicycle_configuration, :invalid_coupon_code, :bicycle_not_in_stock, :customer_not_solvent] }
+      it do
+        all_keys = [:invalid_bicycle_configuration, :invalid_coupon_code, :bicycle_not_in_stock, :customer_not_solvent]
+        expect(Dealer.registry.keys).to eq all_keys
+      end
     end
   end
 
   describe 'demanding objects' do
     describe 'demanding a valid key' do
-      context 'on instance' do
+      context 'when called on instance' do
         it { expect(Dealership::Order.new.demand_key(:invalid_bicycle_configuration)).to eq :invalid_bicycle_configuration }
       end
 
-      context 'on class' do
+      context 'when called on class' do
         it { expect(Dealership::Order.self_demand_key(:invalid_bicycle_configuration)).to eq :invalid_bicycle_configuration }
       end
     end
 
     describe 'demanding an invalid key' do
-      context 'on instance' do
+      context 'when called on instance' do
         it { expect { Dealership::Order.new.demand_key(:xxx) }.to raise_error Dealer::RegistryStore::UnregisteredKeyError, 'key `xxx` is not registered' }
       end
 
-      context 'on class' do
+      context 'when called on class' do
         it { expect { Dealership::Order.self_demand_key(:xxx) }.to raise_error Dealer::RegistryStore::UnregisteredKeyError, 'key `xxx` is not registered' }
       end
     end

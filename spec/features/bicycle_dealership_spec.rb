@@ -2,7 +2,7 @@
 
 RSpec.describe 'bicycle dealership' do
   before do
-    test_class =
+    dealer_class =
       Class.new do
         include RegistrationOffice[:registration]
 
@@ -20,11 +20,9 @@ RSpec.describe 'bicycle dealership' do
         end
       end
 
-    stub_const('Dealer', test_class)
-  end
+    stub_const('Dealer', dealer_class)
 
-  before do
-    test_class =
+    order_class =
       Class.new do
         include RegistrationOffice[:demand, registry_object: Dealer]
 
@@ -40,11 +38,9 @@ RSpec.describe 'bicycle dealership' do
         end
       end
 
-    stub_const('Dealership::Order', test_class)
-  end
+    stub_const('Dealership::Order', order_class)
 
-  before do
-    test_class =
+    supervisor_class =
       Module.new do
         include RegistrationOffice[:demand, registry_object: Dealer]
 
@@ -53,13 +49,14 @@ RSpec.describe 'bicycle dealership' do
         end
       end
 
-    stub_const('Company::Supervisor', test_class)
+    stub_const('Company::Supervisor', supervisor_class)
   end
 
   describe 'the Dealer' do
     context 'when ordering a :car' do
       it 'tries to insult the customer but this raises UnregisteredKeyError' do
-        expect { Dealer.new.call(:car) }.to raise_error Dealer::RegistryStore::UnregisteredKeyError, 'key `insult` is not registered'
+        expect { Dealer.new.call(:car) }
+          .to raise_error Dealer::RegistryStore::UnregisteredKeyError, 'key `insult` is not registered'
       end
     end
 
@@ -84,7 +81,8 @@ RSpec.describe 'bicycle dealership' do
 
   describe 'the Supervisor' do
     it 'wants to see possible failures during ordering' do
-      expect(Company::Supervisor.supervise).to eq [:invalid_bicycle_configuration, :invalid_coupon_code, :bicycle_not_in_stock, :customer_not_solvent]
+      all_keys = [:invalid_bicycle_configuration, :invalid_coupon_code, :bicycle_not_in_stock, :customer_not_solvent]
+      expect(Company::Supervisor.supervise).to eq all_keys
     end
   end
 end
