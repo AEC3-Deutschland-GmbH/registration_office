@@ -26,7 +26,7 @@ RSpec.describe RegistrationOffice do
         end
 
         it do
-          expect(RegistrationOffice[:demand, registry_object: RegistryObject])
+          expect(RegistrationOffice[:demand])
             .to respond_to(:included).and(be_a(Module))
         end
       end

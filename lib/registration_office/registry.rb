@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative 'register'
+require_relative 'registers'
+
 module RegistrationOffice
   # Provides the methods +register+ and +registry+ when included.
   module Registry
@@ -11,55 +14,47 @@ module RegistrationOffice
 
         # This is evaluated withing the dynamically created, nested module "RegistryStore"
         mod.module_eval do
-          const_set('MultipleRegistriesError', Class.new(StandardError))
-          const_set('UnregisteredKeyError', Class.new(StandardError))
-          const_set('DuplicateKeyError', Class.new(StandardError))
+          define_singleton_method(:registering_object) { base }
 
           class << self
-            def registry
-              @registry ||= {}
+            def registers
+              @registers ||= Registers.new
             end
 
-            alias_method :all, :registry
+            def registry(name)
+              registers.fetch(name)
+            end
 
-            def keys
-              registry.keys
+            def all
+              registry.registry
             end
 
             def use!(key)
-              raise const_get('UnregisteredKeyError'), "key `#{key}` is not registered" unless key?(key)
-
-              [key, key?(key)]
+              registry.use!(key)
             end
 
             def key!(key)
-              raise const_get('UnregisteredKeyError'), "key `#{key}` is not registered" unless key?(key)
-
-              key
+              registry.key!(key)
             end
 
             def key?(key)
-              registry[key]
+              registry.key?(key)
             end
 
             private
 
-            def register(*keys)
-              raise const_get('MultipleRegistriesError'), 'registering is only allowed once' if @registry
-
-              keys.each do |key|
-                raise const_get('DuplicateKeyError'), "key `#{key}` already registered" if registry.key?(key)
-
-                registry[key] = []
-              end
+            def register(register_name, keys:)
+              register = Register.new(registering_object).tap { it.register_keys(register_name, keys:) }
+              registers.register_a_register(register_name, register)
+              registering_object.add_demand(register_name, registering_object)
             end
           end
         end
 
         # This is evaluated on "self" for the including class/module
         class << self
-          def registry
-            const_get('RegistryStore')
+          def registry(name)
+            const_get('RegistryStore').registry(name)
           end
 
           private
@@ -70,11 +65,11 @@ module RegistrationOffice
         end
 
         # "Delegate" #registry to class
-        def registry
-          self.class.registry
+        def registry(name)
+          self.class.registry(name)
         end
 
-        include RegistrationOffice[:demand, registry_object: base]
+        include RegistrationOffice[:demand]
       end
     end
   end

@@ -23,8 +23,8 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ### Define a Register
 
-Just add `include RegistrationOffice[:registration]` to any class or model and start registering with
-`register(<keys>)`:
+Just add `include RegistrationOffice[:registration]` to any class or model
+and start registering with `register(<name>, keys: [<keys>])`:
 
 ```ruby
 
@@ -32,8 +32,11 @@ class MyService
   include RegistrationOffice[:registration]
 
   register(
-    :some_failure,
-    :another_api_failure
+    :some_name,
+    keys: [
+      :some_failure,
+      :another_api_failure
+    ]
   )
 end
 ```
@@ -42,20 +45,26 @@ While keys can be any Ruby object, it is recommended to use `Symbol`s for readab
 
 ### Use a Register
 
-The consuming class or module needs to include the `:demand` module that defines the target `registry_object`.
+The consuming class or module needs to include the `:demand` module and show their demand with `.add_demand`.
 
 The register can then be queried by using `demand.key!(<key>)`:
 
 ```ruby
+
 class ServiceCaller
-  include RegistrationOffice[:demand, registry_object: MyService]
+  include RegistrationOffice[:demand]
+  add_demand(:some_name, MyService)
 
   def call
-    demand.key!(:some_failure)
+    demand(:some_name).key!(:some_failure)
   end
 
   def bad_call
-    demand.key!(:unknown_key)
+    demand(:some_name).key!(:unknown_key)
+  end
+
+  def unregistered_name
+    demand(:i_do_not_know_you)
   end
 end
 
@@ -63,10 +72,40 @@ ServiceCaller.call
 # => :some_failure
 
 ServiceCaller.bad_call
-# => MyService::RegistryStore::UnregisteredKeyError: 'key `some_failure` is not registered'
+# => RegistrationOffice::Register::UnregisteredKeyError:
+#    'Register `some_name` in `MyService`: key `unknown_key` is not registered'
+
+ServiceCaller.unregistered_name
+# => RegistrationOffice::Registers::UnregisteredRegisterNameError:
+#    A register with name `i_do_not_know_you` is not registered
 ```
 
-### Example
+### Multiple Registers
+
+It is possible to define more than one register.
+You may have guessed it: this is what the first argument in `.register` is for.
+It defines the name of the register and can be named as you want.
+Defining another register with the same name within the same object raises 
+`RegistrationOffice::Registers::DuplicateRegisterNameError`.
+
+**Note**
+
+The registers are isolated within their registering object.
+You can use the same name in different registering objects.
+But be aware that this restricts you from using them in the same demanding objects:
+
+```ruby
+class ServiceCaller
+  include RegistrationOffice[:demand]
+  add_demand(:some_name, MyService)
+  add_demand(:some_name, MyOtherService)
+end
+# => RegistrationOffice::Demand::DuplicateDemandNameError
+#    "A register with name `some_name` is already demanded"
+
+```
+
+## Example
 
 Assume following `BicycleDealer` class:
 
@@ -76,17 +115,20 @@ class BicycleDealer
   include RegistrationOffice[:registration]
 
   register(
-    :invalid_bicycle_configuration,
-    :invalid_coupon_code,
-    :bicycle_not_in_stock,
-    :customer_not_solvent,
+    :failures,
+    keys: [
+      :invalid_bicycle_configuration,
+      :invalid_coupon_code,
+      :bicycle_not_in_stock,
+      :customer_not_solvent,
+    ]
   )
 
   def call(customers_order)
-    return demand.key!(:insult) if customers_order == :car
+    return demand(:failures).key!(:insult) if customers_order == :car
 
     if customers_order == :bicycle_with_zero_wheels
-      return demand.key!(:invalid_bicycle_configuration)
+      return demand(:failures).key!(:invalid_bicycle_configuration)
     end
 
     Order.new.invoice(customers_order)
@@ -99,14 +141,15 @@ And an `Order` class that wants to use the registered keys from `BicycleDealer`:
 ```ruby
 
 class Order
-  include RegistrationOffice[:demand, registry_object: BicycleDealer]
+  include RegistrationOffice[:demand]
+  add_demand(:failures, BicycleDealer)
 
   def invoice(customers_order)
     case customers_order
     when :golden_bike
-      demand.key!(:customer_not_solvent)
+      demand(:failures).key!(:customer_not_solvent)
     when :cool_bike
-      demand.key!(:bicycle_not_in_stock)
+      demand(:failures).key!(:bicycle_not_in_stock)
     else
       'thx for your order'
     end
@@ -114,12 +157,13 @@ class Order
 end
 ```
 
-Unregistered keys raise an error that is nested in the registering class:
+Unregistered keys raise an error:
 
 ```ruby
 BicycleDealer.new.call(:car)
 # raises UnregisteredKeyError:
-# => Dealer::RegistryStore::UnregisteredKeyError: 'key `insult` is not registered'
+# => RegistrationOffice::Register::UnregisteredKeyError:
+#    'Register `failures` in `BicycleDealer`: key `insult` is not registered'
 
 BicycleDealer.new.call(:golden_bike)
 # => :customer_not_solvent
