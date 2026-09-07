@@ -1,8 +1,8 @@
 # RegistrationOffice
 
-The `registration_office` gem allows registering a collection of key-value pairs.
-The registration is per class (or module), which is useful for registering possible failure codes that a service may return.
-See also the example in section *Usage*.
+The `registration_office` gem allows registering a collection of key-value pairs. The registration is per class (or
+module), which is useful for registering possible failure codes that a service may return. See also the example in
+section *Usage*.
 
 ## Installation
 
@@ -23,14 +23,18 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ### Define a Register
 
-Just add `include RegistrationOffice[:registration]` to any class or model and start registering with `register <key>`:
+Just add `include RegistrationOffice[:registration]` to any class or model and start registering with
+`register(<keys>)`:
 
 ```ruby
+
 class MyService
   include RegistrationOffice[:registration]
-  
-  register :some_failure
-  register :another_api_failure
+
+  register(
+    :some_failure,
+    :another_api_failure
+  )
 end
 ```
 
@@ -45,11 +49,11 @@ The register can then be queried by using `demand.key!(<key>)`:
 ```ruby
 class ServiceCaller
   include RegistrationOffice[:demand, registry_object: MyService]
-  
+
   def call
     demand.key!(:some_failure)
   end
-  
+
   def bad_call
     demand.key!(:unknown_key)
   end
@@ -67,13 +71,16 @@ ServiceCaller.bad_call
 Assume following `BicycleDealer` class:
 
 ```ruby
+
 class BicycleDealer
   include RegistrationOffice[:registration]
 
-  register :invalid_bicycle_configuration
-  register :invalid_coupon_code
-  register :bicycle_not_in_stock
-  register :customer_not_solvent
+  register(
+    :invalid_bicycle_configuration,
+    :invalid_coupon_code,
+    :bicycle_not_in_stock,
+    :customer_not_solvent,
+  )
 
   def call(customers_order)
     return demand.key!(:insult) if customers_order == :car
@@ -86,11 +93,13 @@ class BicycleDealer
   end
 end
 ```
+
 And an `Order` class that wants to use the registered keys from `BicycleDealer`:
 
 ```ruby
+
 class Order
- include RegistrationOffice[:demand, registry_object: BicycleDealer]
+  include RegistrationOffice[:demand, registry_object: BicycleDealer]
 
   def invoice(customers_order)
     case customers_order
@@ -120,7 +129,7 @@ Get all registered keys with `registry.keys`
 
 ```ruby
 BicycleDealer.registry.keys
- # => [:invalid_bicycle_configuration, :invalid_coupon_code, ...]
+# => [:invalid_bicycle_configuration, :invalid_coupon_code, ...]
 ```
 
 Which is the same as `demand.keys` within demanding objects
@@ -132,14 +141,18 @@ Order.demand.keys
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can
+also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the
+version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version,
+push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/AEC3-Deutschland-GmbH/registration_office.
-This project is intended to be a safe, welcoming space for collaboration., and contributors are expected to adhere to the [code of conduct](CODE_OF_CONDUCT.md).
+This project is intended to be a safe, welcoming space for collaboration., and contributors are expected to adhere to
+the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## License
 
@@ -147,4 +160,5 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the RegistrationOffice project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](CODE_OF_CONDUCT.md).
+Everyone interacting in the RegistrationOffice project's codebases, issue trackers, chat rooms and mailing lists is
+expected to follow the [code of conduct](CODE_OF_CONDUCT.md).

@@ -6,10 +6,12 @@ RSpec.describe 'bicycle dealership' do
       Class.new do
         include RegistrationOffice[:registration]
 
-        register :invalid_bicycle_configuration
-        register :invalid_coupon_code
-        register :bicycle_not_in_stock
-        register :customer_not_solvent
+        register(
+          :invalid_bicycle_configuration,
+          :invalid_coupon_code,
+          :bicycle_not_in_stock,
+          :customer_not_solvent,
+        )
 
         def call(customers_order)
           return demand.key!(:insult) if customers_order == :car

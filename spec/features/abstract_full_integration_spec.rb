@@ -6,10 +6,12 @@ RSpec.describe 'abstract full integration' do
       Class.new do
         include RegistrationOffice[:registration]
 
-        register :invalid_bicycle_configuration
-        register :invalid_coupon_code
-        register :bicycle_not_in_stock
-        register :customer_not_solvent
+        register(
+          :invalid_bicycle_configuration,
+          :invalid_coupon_code,
+          :bicycle_not_in_stock,
+          :customer_not_solvent
+        )
 
         def self.self_demand_key(key)
           demand.key!(key)

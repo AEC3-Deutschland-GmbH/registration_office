@@ -11,6 +11,7 @@ module RegistrationOffice
 
         # This is evaluated withing the dynamically created, nested module "RegistryStore"
         mod.module_eval do
+          const_set('MultipleRegistriesError', Class.new(StandardError))
           const_set('UnregisteredKeyError', Class.new(StandardError))
           const_set('DuplicateKeyError', Class.new(StandardError))
 
@@ -43,10 +44,14 @@ module RegistrationOffice
 
             private
 
-            def register(key, *args)
-              raise const_get('DuplicateKeyError'), "key `#{key}` already registered" if registry.key?(key)
+            def register(*keys)
+              raise const_get('MultipleRegistriesError'), 'registering is only allowed once' if @registry
 
-              registry[key] = *args
+              keys.each do |key|
+                raise const_get('DuplicateKeyError'), "key `#{key}` already registered" if registry.key?(key)
+
+                registry[key] = []
+              end
             end
           end
         end
