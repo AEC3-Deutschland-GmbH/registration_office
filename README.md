@@ -138,7 +138,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/registration_office.
+Bug reports and pull requests are welcome on GitHub at https://github.com/AEC3-Deutschland-GmbH/registration_office.
 This project is intended to be a safe, welcoming space for collaboration., and contributors are expected to adhere to the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## License
