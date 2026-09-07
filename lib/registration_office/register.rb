@@ -9,12 +9,12 @@ module RegistrationOffice
 
     attr_reader :name
 
-    def initialize(registering_object, name)
+    def initialize(registering_object)
       @registering_object = registering_object
-      @name = name
     end
 
-    def register_keys(*keys)
+    def register_keys(name, keys:)
+      @name = name
       keys.each do |key|
         raise DuplicateKeyError, "#{identifier}: key `#{key}` already registered" if registry.key?(key)
 

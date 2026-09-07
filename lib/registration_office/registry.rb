@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'register'
+require_relative 'registers'
 
 module RegistrationOffice
   # Provides the methods +register+ and +registry+ when included.
@@ -13,18 +14,16 @@ module RegistrationOffice
 
         # This is evaluated withing the dynamically created, nested module "RegistryStore"
         mod.module_eval do
-          const_set('MultipleRegistriesError', Class.new(StandardError))
-          const_set('UnregisteredKeyError', Class.new(StandardError))
-          const_set('DuplicateKeyError', Class.new(StandardError))
-
-          define_singleton_method(:registry) do
-            @registry ||= Register.new(base, :placeholder)
-          end
+          define_singleton_method(:registering_object) { base }
 
           class << self
-            # def registry
-            #   @registry ||= Register.new(base, :placeholder)
-            # end
+            def registers
+              @registers ||= Registers.new
+            end
+
+            def registry(name = :placeholder)
+              registers.fetch(name)
+            end
 
             def all
               registry.registry
@@ -48,10 +47,9 @@ module RegistrationOffice
 
             private
 
-            def register(*keys)
-              raise const_get('MultipleRegistriesError'), 'registering is only allowed once' if @registry
-
-              registry.register_keys(*keys)
+            def register(*keys, name: :placeholder)
+              register = Register.new(registering_object).tap { it.register_keys(name, keys:) }
+              registers.register_a_register(name, register)
             end
           end
         end
