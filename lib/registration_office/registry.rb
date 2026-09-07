@@ -29,10 +29,6 @@ module RegistrationOffice
               registry.registry
             end
 
-            # def keys
-            #   registry.keys
-            # end
-
             def use!(key)
               registry.use!(key)
             end

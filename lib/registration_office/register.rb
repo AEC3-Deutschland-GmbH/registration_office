@@ -46,6 +46,10 @@ module RegistrationOffice
       @registry ||= {}
     end
 
+    def all
+      registry.to_h
+    end
+
     private
 
     def identifier

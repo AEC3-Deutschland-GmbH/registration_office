@@ -32,31 +32,36 @@ RSpec.describe RegistrationOffice::Registry do
     end
 
     describe 'after including' do
-      describe 'methods' do
-        before do
-          test_class =
-            Class.new do
-              include RegistrationOffice::Registry
-            end
-
-          stub_const('RegisteringClass', test_class)
-        end
-
-        context 'when called on class' do
-          it { expect(RegisteringClass.registry).to respond_to(:key?) }
-          it { expect(RegisteringClass.registry).to respond_to(:all) }
-          it { expect(RegisteringClass.registry).to respond_to(:key!) }
-        end
-
-        context 'when called on instance' do
-          it { expect(RegisteringClass.new.registry).to respond_to(:key?) }
-          it { expect(RegisteringClass.new.registry).to respond_to(:all) }
-          it { expect(RegisteringClass.new.registry).to respond_to(:key!) }
-        end
-      end
-
       describe '.register' do
         describe 'behavior' do
+          context 'when a register with same name was already declared' do
+            before do
+              test_class =
+                Class.new do
+                  include RegistrationOffice::Registry
+
+                  register(:some_name, keys: [:a])
+                  register(:some_other_name, keys: [:b])
+                end
+
+              stub_const('RegisteringClass', test_class)
+            end
+
+            let(:register_duplicate_registers) do
+              RegisteringClass.class_eval do
+                register(:some_name, keys: [:c])
+              end
+            end
+
+            it do
+              expect { register_duplicate_registers }
+                .to raise_error(
+                      RegistrationOffice::Registers::DuplicateRegisterNameError,
+                      'A register with name `some_name` is already registered'
+                    )
+            end
+          end
+
           context 'when key was already declared' do
             before do
               test_class =
@@ -69,7 +74,7 @@ RSpec.describe RegistrationOffice::Registry do
 
             let(:register_duplicate_key) do
               RegisteringClass.class_eval do
-                register(:placeholder, keys: [:key_one, :key_one])
+                register(:some_name, keys: [:key_one, :key_one])
               end
             end
 
@@ -77,7 +82,7 @@ RSpec.describe RegistrationOffice::Registry do
               expect { register_duplicate_key }
                 .to raise_error(
                       RegistrationOffice::Register::DuplicateKeyError,
-                      'Register `placeholder` in `RegisteringClass`: key `key_one` already registered'
+                      'Register `some_name` in `RegisteringClass`: key `key_one` already registered'
                     )
             end
           end
@@ -88,7 +93,7 @@ RSpec.describe RegistrationOffice::Registry do
                 Class.new do
                   include RegistrationOffice::Registry
 
-                  register(:placeholder, keys: [:key_one, :key_two])
+                  register(:some_name, keys: [:key_one, :key_two])
                 end
 
               stub_const('RegisteringClass', test_class)
@@ -98,14 +103,14 @@ RSpec.describe RegistrationOffice::Registry do
               subject(:registering_class) { RegisteringClass }
 
               it 'returns the key when registered' do
-                expect(registering_class.registry.key!(:key_one)).to be :key_one
+                expect(registering_class.registry(:some_name).key!(:key_one)).to be :key_one
               end
 
               it 'raises RegistrationOffice::Register::UnregisteredKeyError when not registered' do
-                expect { registering_class.registry.key!(:xxx) }
+                expect { registering_class.registry(:some_name).key!(:xxx) }
                   .to raise_error(
                         RegistrationOffice::Register::UnregisteredKeyError,
-                        'Register `placeholder` in `RegisteringClass`: key `xxx` is not registered'
+                        'Register `some_name` in `RegisteringClass`: key `xxx` is not registered'
                       )
               end
             end
@@ -114,14 +119,14 @@ RSpec.describe RegistrationOffice::Registry do
               subject(:registering_instance) { RegisteringClass.new }
 
               it 'returns the key when registered' do
-                expect(registering_instance.registry.key!(:key_one)).to be :key_one
+                expect(registering_instance.registry(:some_name).key!(:key_one)).to be :key_one
               end
 
               it 'raises RegistrationOffice::Register::UnregisteredKeyError when not registered' do
-                expect { registering_instance.registry.key!(:xxx) }
+                expect { registering_instance.registry(:some_name).key!(:xxx) }
                   .to raise_error(
                         RegistrationOffice::Register::UnregisteredKeyError,
-                        'Register `placeholder` in `RegisteringClass`: key `xxx` is not registered'
+                        'Register `some_name` in `RegisteringClass`: key `xxx` is not registered'
                       )
               end
             end
@@ -135,23 +140,20 @@ RSpec.describe RegistrationOffice::Registry do
             Class.new do
               include RegistrationOffice::Registry
 
-              register(
-                :key_one,
-                :key_two
-              )
+              register(:some_name, keys: [:key_one, :key_two])
             end
 
           stub_const('RegisteringClass', test_class)
         end
 
-        it { expect(RegisteringClass.registry).to eq RegisteringClass::RegistryStore }
+        it { expect(RegisteringClass.registry(:some_name)).to be_a RegistrationOffice::Register }
 
         describe '.all' do
-          it { expect(RegisteringClass.registry.all).to eq({ key_one: [], key_two: [] }) }
+          it { expect(RegisteringClass.registry(:some_name).all).to eq({ key_one: [], key_two: [] }) }
         end
 
         describe '.keys' do
-          it { expect(RegisteringClass.registry.keys).to eq([:key_one, :key_two]) }
+          it { expect(RegisteringClass.registry(:some_name).keys).to eq([:key_one, :key_two]) }
         end
       end
 
@@ -161,10 +163,7 @@ RSpec.describe RegistrationOffice::Registry do
             Class.new do
               include RegistrationOffice::Registry
 
-              register(
-                :key_one,
-                :key_two
-              )
+              register(:some_name, keys: [:key_one, :key_two])
             end
 
           stub_const('RegisteringClass', test_class)
@@ -172,13 +171,13 @@ RSpec.describe RegistrationOffice::Registry do
 
         describe '#demand for itself' do
           context 'when called on class' do
-            it { expect(RegisteringClass.demand).to respond_to(:key!) }
-            it { expect(RegisteringClass.demand).to respond_to(:use!) }
+            it { expect(RegisteringClass.demand(:some_name)).to respond_to(:key!) }
+            it { expect(RegisteringClass.demand(:some_name)).to respond_to(:use!) }
           end
 
           context 'when called on instance' do
-            it { expect(RegisteringClass.new.demand).to respond_to(:key!) }
-            it { expect(RegisteringClass.new.demand).to respond_to(:use!) }
+            it { expect(RegisteringClass.new.demand(:some_name)).to respond_to(:key!) }
+            it { expect(RegisteringClass.new.demand(:some_name)).to respond_to(:use!) }
           end
         end
       end

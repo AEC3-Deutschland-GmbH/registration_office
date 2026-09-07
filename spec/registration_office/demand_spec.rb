@@ -5,6 +5,8 @@ RSpec.describe RegistrationOffice::Demand do
     test_class =
       Class.new do
         include RegistrationOffice::Registry
+
+        register(:some_name, keys: [])
       end
 
     stub_const('RegistryObject', test_class)
@@ -14,77 +16,38 @@ RSpec.describe RegistrationOffice::Demand do
     test_module =
       Module.new do
         include RegistrationOffice::Registry
+
+        register(:some_name, keys: [])
       end
 
     stub_const('RegistryObject', test_module)
-  end
-
-  describe '.[]' do
-    it 'returns a Module' do
-      stub_registry_class
-      expect(RegistrationOffice::Demand[RegistryObject]).to be_a(Module)
-    end
-  end
-
-  describe '.safe_constantize' do
-    subject(:call_described_method) { RegistrationOffice::Demand.send(:safe_constantize, registry_object) }
-
-    context 'when given registry object is a Module' do
-      let(:registry_object) { RegistryObject }
-
-      before { stub_registry_module }
-
-      it { expect { call_described_method }.not_to raise_error }
-      it { is_expected.to be registry_object }
-    end
-
-    context 'when given registry object is a Class' do
-      let(:registry_object) { RegistryObject }
-
-      before { stub_registry_class }
-
-      it { expect { call_described_method }.not_to raise_error }
-      it { is_expected.to be registry_object }
-    end
-
-    context 'when given registry object is a String' do
-      context 'that does not define any Class or Module' do
-        let(:registry_object) { 'xxx' }
-
-        it { expect { call_described_method }.to raise_error ArgumentError, '`xxx` is not a known Class or Module' }
-      end
-
-      context 'that defines a known Class or Module' do
-        let(:registry_object) { RegistryObject.to_s }
-
-        before { stub_registry_class }
-
-        it { expect { call_described_method }.not_to raise_error }
-        it { is_expected.to be RegistryObject }
-      end
-    end
   end
 
   describe '.prepare_mod' do
     let!(:dynamic_module) { stub_const('DynamicModule', Module.new) }
 
     describe 'DynamicModule' do
-      before { RegistrationOffice::Demand.send(:prepare_mod, dynamic_module, stub_registry_class) }
-
-      it 'defines .included' do
-        expect(DynamicModule).to respond_to(:included)
-      end
-
-      it { expect { Module.new.include(DynamicModule) }.not_to raise_error }
-      it { expect { Class.new.include(DynamicModule) }.not_to raise_error }
+      it { expect { Module.new.include(RegistrationOffice::Demand.send(:prepare_mod, dynamic_module)) }.not_to raise_error }
+      it { expect { Class.new.include(RegistrationOffice::Demand.send(:prepare_mod, dynamic_module)) }.not_to raise_error }
     end
+  end
 
-    context 'when included' do
+  describe '.included' do
+    RSpec.shared_examples_for 'an object with demands' do |stubbed_registry_object|
       before do
-        RegistrationOffice::Demand.send(:prepare_mod, dynamic_module, stub_registry_class)
+        stub =
+          case stubbed_registry_object
+          when :class
+            stub_registry_class
+          when :module
+            stub_registry_module
+          end
+
         test_class =
           Class.new do
-            include DynamicModule
+            include RegistrationOffice::Demand
+
+            add_demand(:some_name, stub)
           end
 
         stub_const('DemandingObject', test_class)
@@ -92,12 +55,13 @@ RSpec.describe RegistrationOffice::Demand do
 
       describe 'singleton methods and constants' do
         it { expect(DemandingObject).to respond_to(:demand) }
+        it { expect(DemandingObject).to respond_to(:add_demand) }
         it { expect(DemandingObject).to be_const_defined(:RegistryDemand) }
 
         describe 'delegated via #demand' do
-          it { expect(DemandingObject.demand).to respond_to(:key!) }
-          it { expect(DemandingObject.demand).to respond_to(:use!) }
-          it { expect(DemandingObject.demand).to respond_to(:keys) }
+          it { expect(DemandingObject.demand(:some_name)).to respond_to(:key!) }
+          it { expect(DemandingObject.demand(:some_name)).to respond_to(:use!) }
+          it { expect(DemandingObject.demand(:some_name)).to respond_to(:keys) }
         end
       end
 
@@ -105,10 +69,41 @@ RSpec.describe RegistrationOffice::Demand do
         it { expect(DemandingObject.new).to respond_to(:demand) }
 
         describe 'delegated via #demand' do
-          it { expect(DemandingObject.new.demand).to respond_to(:key!) }
-          it { expect(DemandingObject.new.demand).to respond_to(:use!) }
-          it { expect(DemandingObject.new.demand).to respond_to(:keys) }
+          it { expect(DemandingObject.new.demand(:some_name)).to respond_to(:key!) }
+          it { expect(DemandingObject.new.demand(:some_name)).to respond_to(:use!) }
+          it { expect(DemandingObject.new.demand(:some_name)).to respond_to(:keys) }
         end
+      end
+    end
+
+    context 'when included as class' do
+      it_behaves_like 'an object with demands', :class
+    end
+
+    context 'when included as module' do
+      it_behaves_like 'an object with demands', :module
+    end
+
+    context 'when another demand with the same name is demanded' do
+      let(:double_demand) do
+        stubbed_register_object1 = stub_registry_class
+        stubbed_register_object2 = stub_registry_module
+        test_class =
+          Class.new do
+            include RegistrationOffice::Demand
+
+            add_demand(:some_name, stubbed_register_object1)
+            add_demand(:some_name, stubbed_register_object2)
+          end
+
+        stub_const('DemandingObject', test_class)
+      end
+
+      it do
+        expect { double_demand }.to raise_error(
+                                      RegistrationOffice::Demand::DuplicateDemandNameError,
+                                      'A register with name `some_name` is already demanded'
+                                    )
       end
     end
   end
