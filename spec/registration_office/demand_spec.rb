@@ -33,6 +33,20 @@ RSpec.describe RegistrationOffice::Demand do
   end
 
   describe '.included' do
+    context 'when already included' do
+      let(:test_class) do
+        Class.new do
+          include RegistrationOffice::Demand
+        end
+      end
+
+      it 'must not override the already defined RegistryDemand module' do
+        included_module = test_class::RegistryDemand
+        test_class.module_eval { include RegistrationOffice::Demand }
+        expect(included_module).to be test_class::RegistryDemand
+      end
+    end
+
     RSpec.shared_examples_for 'an object with demands' do |stubbed_registry_object|
       before do
         stub =

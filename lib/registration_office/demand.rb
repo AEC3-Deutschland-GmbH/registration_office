@@ -11,6 +11,8 @@ module RegistrationOffice
     class << self
       # rubocop:disable-next Metrics/MethodLength
       def included(base)
+        return if registry_demand_already_defined?(base)
+
         mod = prepare_mod(Module.new)
         base.module_eval do
           const_set('RegistryDemand', mod)
@@ -28,6 +30,10 @@ module RegistrationOffice
       end
 
       private
+
+      def registry_demand_already_defined?(base)
+        defined?(base::RegistryDemand)
+      end
 
       # rubocop:disable-next Metrics/MethodLength
       def prepare_mod(mod)
