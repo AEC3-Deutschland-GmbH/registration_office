@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-08
+
 - Adds option for additional payload for each key:  
     ```ruby
     register(:some_name, keys: [:key_one])
