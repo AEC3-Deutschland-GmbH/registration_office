@@ -13,7 +13,7 @@ RSpec.describe 'bicycle dealership' do
               :invalid_bicycle_configuration,
               :invalid_coupon_code,
               :bicycle_not_in_stock,
-              :customer_not_solvent
+              { customer_not_solvent: { message: 'Sent the Collector!' } }
             ]
         )
 
@@ -37,7 +37,7 @@ RSpec.describe 'bicycle dealership' do
         def invoice(customers_order)
           case customers_order
           when :golden_bike
-            demand(:failures).key!(:customer_not_solvent)
+            demand(:failures).use!(:customer_not_solvent)
           when :cool_bike
             demand(:failures).key!(:bicycle_not_in_stock)
           else
@@ -81,7 +81,7 @@ RSpec.describe 'bicycle dealership' do
 
     context 'when ordering a :golden_bike' do
       it 'must reject the order because the customer is not rich enough' do
-        expect(Dealer.new.call(:golden_bike)).to eq :customer_not_solvent
+        expect(Dealer.new.call(:golden_bike)).to eq [:customer_not_solvent, { message: 'Sent the Collector!' }]
       end
     end
 

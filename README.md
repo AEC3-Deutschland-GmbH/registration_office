@@ -2,7 +2,7 @@
 
 The `registration_office` gem allows registering a collection of key-value pairs. The registration is per class (or
 module), which is useful for registering possible failure codes that a service may return. See also the example in
-section *Usage*.
+section [*Example*](#example).
 
 ## Installation
 
@@ -28,6 +28,8 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ### Define a Register
 
+#### Keys only
+
 Just add `include RegistrationOffice[:registration]` to any class or model
 and start registering with `register(<name>, keys: [<keys>])`:
 
@@ -47,6 +49,33 @@ end
 ```
 
 While keys can be any Ruby object, it is recommended to use `Symbol`s for readability.
+
+#### Keys with Payload
+
+The gem's version `v0.3.0` adds optional payload for each key:
+
+```ruby
+class MyService
+  include RegistrationOffice[:registration]
+
+  register(
+    :some_name,
+    keys: [
+            { some_failure: { message: 'Something went wrong' } },
+            :another_api_failure
+    ]
+  )
+end
+
+MyService.demand(:some_name).key!(:some_failure)
+# => :some_failure
+
+MyService.demand(:some_name).use!(:some_failure)
+# => [:some_failure, { :message => "Something went wrong" }]
+
+MyService.demand(:some_name).use!(:another_api_failure)
+# => [:another_api_failure, []]
+```
 
 ### Use a Register
 
@@ -84,6 +113,10 @@ ServiceCaller.unregistered_name
 # => RegistrationOffice::Registers::UnregisteredRegisterNameError:
 #    A register with name `i_do_not_know_you` is not registered
 ```
+
+Note that you do not need to define a demand for the registering object itself.
+As soon as you `register` a register, the corresponding `demand` methods (class/mdoule and instance method)
+are automatically added.
 
 ### Multiple Registers
 

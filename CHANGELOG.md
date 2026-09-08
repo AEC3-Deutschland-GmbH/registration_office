@@ -1,5 +1,17 @@
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-08
+
+- Adds option for additional payload for each key:  
+    ```ruby
+    register(:some_name, keys: [:key_one])
+    # is identical to
+    register(:some_name, keys: [key_one: []])
+    
+    # The method `#use!` allows you to access the payload as well:
+    demand (:some_name).use!(:key_one)
+    ```
+
 ## [0.2.1] - 2026-09-08
 
 - Prevent overriding of already defined demands when `RegistrationOffice[:demand]` is included multiple times.
