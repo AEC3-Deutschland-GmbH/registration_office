@@ -6,7 +6,12 @@ section *Usage*.
 
 ## Installation
 
-TODO
+Currently, the gem is only available via GitHub:
+
+```ruby
+# Gemfile
+gem 'registration_office', '0.2.0', github: 'AEC3-Deutschland-GmbH/registration_office'
+```
 
 <!--Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
 
@@ -182,6 +187,15 @@ Which is the same as `demand.keys` within demanding objects
 Order.demand.keys
 # => [:invalid_bicycle_configuration, :invalid_coupon_code, ...]
 ```
+
+## Roadmap
+
+If this gem proves to be useful, following topics may be added:
+
+- Meta:
+    - Publishing on https://gem.coop
+    - CI/CD via GitHub Actions (`rspec`, `rubocop`, publishing)
+- Features: currently nothing more planned
 
 ## Development
 
