@@ -188,6 +188,15 @@ Order.demand.keys
 # => [:invalid_bicycle_configuration, :invalid_coupon_code, ...]
 ```
 
+## Roadmap
+
+If this gem proves to be useful, following topics may be added:
+
+- Meta:
+    - Publishing on https://gem.coop
+    - CI/CD via GitHub Actions (`rspec`, `rubocop`, publishing)
+- Features: currently nothing more planned
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can
