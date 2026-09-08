@@ -16,9 +16,10 @@ module RegistrationOffice
     def register_keys(name, keys:)
       @name = name
       keys.each do |key|
-        raise DuplicateKeyError, "#{identifier}: key `#{key}` already registered" if registry.key?(key)
+        key_as_hash, actual_key = key_to_hash(key)
+        raise DuplicateKeyError, "#{identifier}: key `#{actual_key}` already registered" if registry.key?(actual_key)
 
-        registry[key] = []
+        registry.merge!(key_as_hash)
       end
     end
 
@@ -29,7 +30,7 @@ module RegistrationOffice
     def use!(key)
       raise UnregisteredKeyError, "#{identifier}: key `#{key}` is not registered" unless key?(key)
 
-      [key, key?(key)]
+      [key, registry[key]]
     end
 
     def key!(key)
@@ -39,7 +40,7 @@ module RegistrationOffice
     end
 
     def key?(key)
-      registry[key]
+      registry.key?(key)
     end
 
     def registry
@@ -54,6 +55,14 @@ module RegistrationOffice
 
     def identifier
       "Register `#{name}` in `#{@registering_object}`"
+    end
+
+    def key_to_hash(key)
+      if key.is_a?(Hash)
+        [key, key.keys.first]
+      else
+        [{ key => [] }, key]
+      end
     end
   end
 end

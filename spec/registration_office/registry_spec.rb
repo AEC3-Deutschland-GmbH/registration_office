@@ -182,5 +182,37 @@ RSpec.describe RegistrationOffice::Registry do
         end
       end
     end
+
+    context 'when registering keys with payload' do
+      before do
+        test_class =
+          Class.new do
+            include RegistrationOffice::Registry
+
+            register(
+              :some_name,
+              keys:
+                [
+                  { a: { message: 'I am key a' } },
+                  { b: { message: 'I am key b' } }
+                ]
+            )
+          end
+
+        stub_const('RegisteringClass', test_class)
+      end
+
+      describe '#key!' do
+        it 'returns the key as usual' do
+          expect(RegisteringClass.demand(:some_name).key!(:a)).to eq :a
+        end
+      end
+
+      describe '#use!' do
+        it 'returns the key and the payload' do
+          expect(RegisteringClass.demand(:some_name).use!(:a)).to eq([:a, { message: 'I am key a' }])
+        end
+      end
+    end
   end
 end
