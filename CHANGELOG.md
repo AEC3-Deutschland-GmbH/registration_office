@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.3.1] - 2026-09-09
+
+- Updates `README.md` and the `gemspec` file for publishing on rubygems.org
+
 ## [0.3.0] - 2026-09-08
 
 - Adds option for additional payload for each key:  
