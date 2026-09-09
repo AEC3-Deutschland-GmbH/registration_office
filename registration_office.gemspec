@@ -10,13 +10,15 @@ Gem::Specification.new do |spec|
 
   spec.summary = 'Allows named registers within modules and classes'
   spec.description = <<~DESCRIPTION
-    Allows named registers within modules and classes
+    Allows named registers within modules and classes.
+    This is e.g. useful for registering failure codes for a service object:
+    - You get a register of all available failure codes, making their discovery and auto-documentation easy
+    - You get explicit exceptions if unregistered keys are used in your codebase
   DESCRIPTION
-  spec.homepage = 'https://github.com/araccaine/registration_office'
+  spec.homepage = 'https://github.com/AEC3-Deutschland-GmbH/registration_office'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 3.4'
 
-  # spec.metadata['allowed_push_host'] = "TODO: Set to your gem server 'https://example.com'"
   spec.metadata['rubygems_mfa_required'] = 'true'
 
   spec.metadata['homepage_uri'] = spec.homepage
