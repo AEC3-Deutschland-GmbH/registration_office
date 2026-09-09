@@ -6,23 +6,28 @@ section [*Example*](#example).
 
 ## Installation
 
-Currently, the gem is only available via GitHub:
+### Using `bundler`
+
+If your application uses a `Gemfile`, add it there:
 
 ```ruby
 # Gemfile
-gem 'registration_office', '0.2.0', github: 'AEC3-Deutschland-GmbH/registration_office'
+gem 'registration_office'
 ```
 
-<!--Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+*or* add the gem to the application's Gemfile by executing:
 
-Install the gem and add to the application's Gemfile by executing:
+```shell
+$ bundle add registration_office
+```
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+### Without `bundler`
 
 If bundler is not being used to manage dependencies, install the gem by executing:
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
--->
+```shell
+$ gem install registration_office
+```
 
 ## Usage
 
@@ -242,7 +247,7 @@ push git commits and the created tag, and push the `.gem` file to [rubygems.org]
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/AEC3-Deutschland-GmbH/registration_office.
-This project is intended to be a safe, welcoming space for collaboration., and contributors are expected to adhere to
+This project is intended to be a safe, welcoming space for collaboration. Contributors are expected to adhere to
 the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## License
