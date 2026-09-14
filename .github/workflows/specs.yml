@@ -1,0 +1,45 @@
+---
+name: Specs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [ opened, synchronize, reopened, ready_for_review ]
+    branches: [ main ]
+
+jobs:
+  specs:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ruby: 3.4.10
+          - ruby: 4.0.6
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "${{ matrix.ruby }}"
+          bundler-cache: true
+      - name: Install bundler
+        run: gem install bundler:4.0.15
+      - name: Setup dependencies
+        run: bin/setup
+      - name: Run specs
+        run: bundle exec rspec
+
+  rubocop:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4.10
+          bundler-cache: true
+      - name: Run RuboCop
+        run: bundle exec rubocop
