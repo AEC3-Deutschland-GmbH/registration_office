@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.3.2] - 2026-09-14
+
+- Add GitHub Action/Workflow for automated testing
+
 ## [0.3.1] - 2026-09-09
 
 - Updates `README.md` and the `gemspec` file for publishing on rubygems.org
