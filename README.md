@@ -1,5 +1,8 @@
 # RegistrationOffice
 
+[![Static Badge](https://img.shields.io/badge/gem.coop-30B60F)](https://gem.coop/@aec3/registration_office)
+[![Gem Version](https://badge.fury.io/rb/registration_office.svg?icon=si%3Arubygems&icon_color=%23e01b24)](https://badge.fury.io/rb/registration_office)
+
 The `registration_office` gem allows registering a collection of key-value pairs. The registration is per class (or
 module), which is useful for registering possible failure codes that a service may return. See also the example in
 section [*Example*](#example).
@@ -231,8 +234,10 @@ Order.demand.keys
 If this gem proves to be useful, following topics may be added:
 
 - Meta:
-    - Publishing on https://gem.coop
-    - CI/CD via GitHub Actions (`rspec`, `rubocop`, publishing)
+    - [X] Publishing on https://gem.coop
+    - CI/CD via GitHub Actions
+        - [X] `rspec`, `rubocop`
+        - [ ] publishing
 - Features: currently nothing more planned
 
 ## Development
